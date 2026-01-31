@@ -103,40 +103,36 @@
     </div>
 
     <script>
-        function handleLogin() {
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
-            const wrapper = document.getElementById('loginWrapper');
-            const loader = document.getElementById('loading-screen');
-            const error = document.getElementById('error-msg');
+        
+function handleLogin() {
+    const user = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+    const wrapper = document.getElementById('loginWrapper');
+    const loader = document.getElementById('loading-screen');
+    const error = document.getElementById('error-msg');
 
-            // 1. Check Credentials
-            if (user === "Jom Admin" && pass === "Admin1234") {
-                // hide error if visible
-                error.style.display = 'none';
+    if (user === "Jom Admin" && pass === "Admin1234") {
+        error.style.display = 'none';
 
-                // 2. Start Transition: Fade out login box
-                wrapper.style.opacity = '0';
-                wrapper.style.transform = 'scale(0.9)';
+        wrapper.style.opacity = '0';
+        wrapper.style.transform = 'scale(0.9)';
 
-                // 3. Show the "Black Loading Screen"
-                setTimeout(() => {
-                    loader.style.display = 'flex';
-                    loader.style.opacity = '1';
-                }, 400);
+        setTimeout(() => {
+            loader.style.display = 'flex';
+            loader.style.opacity = '1';
+        }, 400);
 
-                // 4. Route to dashboard after 2 seconds of loading
-                setTimeout(() => {
-                    window.location.href = "dashboard.html";
-                }, 2500);
+        // This is the critical part for GitHub Pages
+        setTimeout(() => {
+            // Force lowercase check and relative path
+            window.location.assign("./dashboard.html");
+        }, 2500);
 
-            } else {
-                // Incorrect login
-                error.style.display = 'block';
-                // Reset password field
-                document.getElementById('password').value = "";
-            }
-        }
+    } else {
+        error.style.display = 'block';
+        document.getElementById('password').value = "";
+    }
+}
     </script>
 </body>
 </html>
