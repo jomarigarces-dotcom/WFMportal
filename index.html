@@ -3,260 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | Multi-Portal</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Secure Login Portal</title>
     <style>
-        body { 
-            margin: 0; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: #232425; 
-            display: flex; 
-            flex-direction: column; 
-            min-height: 100vh;
+        :root {
+            --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --accent: #4e54c8;
         }
 
-        nav { 
-            background: #171825; 
-            padding: 15px 40px; 
-            color: white; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            box-shadow: 0 4px 12px rgba(37, 35, 35, 0.1);
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
         }
 
-        .container { 
-            flex: 1;
-            padding: 50px 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 30px;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .icon-card {
-            background: white; 
-            padding: 40px 20px;
-            border-radius: 20px; 
-            display: flex; 
-            flex-direction: column;
-            align-items: center; 
-            justify-content: center;
-            text-decoration: none; 
-            color: #333; 
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-            text-align: center;
-            cursor: pointer;
-        }
-
-        /* Icon & Emoji Styling */
-        .icon-card i, .emoji-icon { 
-            font-size: 50px; 
-            color: #000000; 
-            margin-bottom: 20px; 
-            transition: all 0.4s ease;
-            display: inline-block;
-        }
-
-        /* THEME TRICK: This makes the colored emoji look like a black icon */
-        .emoji-icon {
-            filter: grayscale(100%) brightness(0);
-            line-height: 1;
-        }
-
-        .icon-card span {
-            font-weight: 600;
-            font-size: 16px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Hover Effects */
-        .icon-card:hover { 
-            background: #2e2e36; 
-            color: white; 
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(78, 84, 200, 0.3);
-        }
-
-        .icon-card:hover i { 
-            color: white; 
-            transform: scale(1.1);
-        }
-
-        /* THEME TRICK: This makes the emoji turn pure white on hover */
-        .icon-card:hover .emoji-icon {
-            filter: grayscale(100%) brightness(0) invert(1);
-            transform: scale(1.1);
-        }
-
-        /* Add Button Styling */
-        .add-btn-card {
-            border: 2px dashed #555;
-            background: rgba(255,255,255,0.05);
-            color: #888;
-        }
-        .add-btn-card i { color: #888; }
-        .add-btn-card:hover { border-color: #fff; background: #2e2e36; }
-
-        /* Modal Styling */
-        #modalOverlay {
-            display: none;
+        /* Full Screen Loading Overlay (The "Black Screen") */
+        #loading-screen {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            z-index: 1000;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            display: none; /* Hidden by default */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(5px);
+            z-index: 9999;
+            color: white;
+            transition: opacity 0.5s ease;
         }
 
-        .modal-content {
-            background: #fff;
-            padding: 30px;
+        .spinner {
+            width: 50px; height: 50px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Login Page UI */
+        .login-container {
+            width: 380px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
-            width: 350px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            padding: 30px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            text-align: center;
+            transition: all 0.5s ease;
         }
 
-        .modal-content h3 { margin: 0; color: #171825; font-size: 22px; }
+        .bot-header { color: #fff; margin-bottom: 25px; font-weight: 300; }
+        .bot-header b { color: var(--accent); }
 
-        .modal-content input {
-            padding: 12px;
-            border: 2px solid #eee;
-            border-radius: 10px;
-            outline: none;
-            font-size: 14px;
-            transition: 0.3s;
+        .input-box {
+            background: rgba(255,255,255,0.9);
+            padding: 20px; border-radius: 15px;
+            display: flex; flex-direction: column; gap: 15px;
         }
 
-        .modal-content input:focus { border-color: #4e54c8; }
-
-        .modal-actions { display: flex; gap: 10px; margin-top: 10px; }
-
-        .btn {
-            flex: 1; padding: 12px; border: none; border-radius: 10px;
-            cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.3s;
+        input {
+            padding: 12px; border: 1px solid #ddd;
+            border-radius: 8px; outline: none; font-size: 14px;
         }
 
-        .btn-complete { background: #171825; color: white; }
-        .btn-complete:hover { background: #4e54c8; }
-        .btn-cancel { background: #eee; color: #666; }
-
-        .logout { 
-            color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,0.4); 
-            padding: 8px 18px; border-radius: 8px; font-size: 14px; transition: 0.3s;
+        .login-btn {
+            background: var(--accent); color: white;
+            border: none; padding: 12px; border-radius: 8px;
+            font-weight: bold; cursor: pointer; transition: 0.3s;
         }
 
-        @media (max-width: 600px) {
-            .container { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .login-btn:hover { background: #3b41a8; transform: translateY(-2px); }
+
+        #error-msg {
+            color: #ff4d4d; font-size: 13px; margin-top: 10px; display: none;
         }
     </style>
 </head>
 <body>
 
-    <nav>
-        <span><b>Admin Panel</b> | Jom</span>
-        <a href="index.html" class="logout">Logout</a>
-    </nav>
-
-    <div class="container" id="iconContainer">
-        <!-- Pre-existing icons -->
-        <a href="https://latte-irr.web.app/admin/login" target="_blank" class="icon-card">
-            <i class="fas fa-coffee"></i>
-            <span>Latte Admin</span>
-        </a>
-        <a href="https://script.google.com/..." target="_blank" class="icon-card">
-            <i class="fas fa-users-cog"></i>
-            <span>Workforce REST</span>
-        </a>
-        <a href="https://script.google.com/..." target="_blank" class="icon-card">
-            <i class="fas fa-hammer"></i>
-            <span>Deconstructor</span>
-        </a>
-        <a href="https://script.google.com/..." target="_blank" class="icon-card">
-            <i class="fas fa-kiwi-bird"></i>
-            <span>Quack</span>
-        </a>
-        <a href="https://notebooklm.google.com/..." target="_blank" class="icon-card">
-            <i class="fas fa-book-open"></i>
-            <span>LM Notebook</span>
-        </a>
-
-        <!-- The "Add" trigger button -->
-        <div class="icon-card add-btn-card" onclick="openModal()">
-            <i class="fas fa-plus-circle"></i>
-            <span>Add Portal</span>
-        </div>
+    <!-- This screen shows only when you log in correctly -->
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <p id="loading-text">Authenticating Jom Admin...</p>
     </div>
 
-    <!-- Modal Overlay -->
-    <div id="modalOverlay">
-        <div class="modal-content">
-            <h3>Add New Portal</h3>
-            <input type="text" id="newName" placeholder="Portal Name">
-            <input type="url" id="newUrl" placeholder="Link URL (https://...)">
-            <input type="text" id="newEmoji" placeholder="Enter Emoji (e.g. 🚀)">
-            <div class="modal-actions">
-                <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
-                <button class="btn btn-complete" onclick="addNewCard()">Complete</button>
-            </div>
+    <div class="login-container" id="loginWrapper">
+        <h2 class="bot-header">System <b>Login</b></h2>
+        <div class="input-box">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button class="login-btn" onclick="handleLogin()">Access Dashboard</button>
+            <div id="error-msg">Access Denied: Invalid Credentials</div>
         </div>
     </div>
 
     <script>
-        const container = document.getElementById('iconContainer');
-        const overlay = document.getElementById('modalOverlay');
+        function handleLogin() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const wrapper = document.getElementById('loginWrapper');
+            const loader = document.getElementById('loading-screen');
+            const error = document.getElementById('error-msg');
 
-        // Load saved portals from LocalStorage
-        window.onload = () => {
-            const saved = JSON.parse(localStorage.getItem('myPortals')) || [];
-            saved.forEach(item => renderCard(item.name, item.url, item.emoji));
-        };
+            // 1. Check Credentials
+            if (user === "Jom Admin" && pass === "Admin1234") {
+                // hide error if visible
+                error.style.display = 'none';
 
-        function openModal() { overlay.style.display = 'flex'; }
-        function closeModal() {
-            overlay.style.display = 'none';
-            document.getElementById('newName').value = '';
-            document.getElementById('newUrl').value = '';
-            document.getElementById('newEmoji').value = '';
-        }
+                // 2. Start Transition: Fade out login box
+                wrapper.style.opacity = '0';
+                wrapper.style.transform = 'scale(0.9)';
 
-        function addNewCard() {
-            const name = document.getElementById('newName').value;
-            const url = document.getElementById('newUrl').value;
-            const emoji = document.getElementById('newEmoji').value;
+                // 3. Show the "Black Loading Screen"
+                setTimeout(() => {
+                    loader.style.display = 'flex';
+                    loader.style.opacity = '1';
+                }, 400);
 
-            if (!name || !url || !emoji) return alert("Fill all fields");
+                // 4. Route to dashboard after 2 seconds of loading
+                setTimeout(() => {
+                    window.location.href = "dashboard.html";
+                }, 2500);
 
-            renderCard(name, url, emoji);
-
-            // Save to storage
-            const saved = JSON.parse(localStorage.getItem('myPortals')) || [];
-            saved.push({ name, url, emoji });
-            localStorage.setItem('myPortals', JSON.stringify(saved));
-
-            closeModal();
-        }
-
-        function renderCard(name, url, emoji) {
-            const a = document.createElement('a');
-            a.href = url;
-            a.target = "_blank";
-            a.className = "icon-card";
-            a.innerHTML = `
-                <div class="emoji-icon">${emoji}</div>
-                <span>${name}</span>
-            `;
-            // Insert before the "Add Portal" button
-            container.insertBefore(a, container.lastElementChild);
+            } else {
+                // Incorrect login
+                error.style.display = 'block';
+                // Reset password field
+                document.getElementById('password').value = "";
+            }
         }
     </script>
 </body>
